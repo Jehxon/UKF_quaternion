@@ -26,32 +26,45 @@ class SensorServer:
           s.close()
       return IP
   
+  def get_data(self, data):
+      data = json.loads(data)
+      ts = data["Timestamp"] * 0.001
+      x = float(data["x"])
+      y = float(data["y"])
+      z = float(data["z"])
+      return ts, x, y, z
+  
   async def echo(self, websocket, path):
     async for message in websocket:
         if path == '/accelerometer':
             data = await websocket.recv()
+            args = self.get_data(data)
             for cb in self.accCb:
-              cb(data)
+              cb(*args)
 
         if path == '/gyroscope':
             data = await websocket.recv()
+            args = self.get_data(data)
             for cb in self.gyroCb:
-              cb(data)
+              cb(*args)
 
         if path == '/magnetometer':
             data = await websocket.recv()
+            args = self.get_data(data)
             for cb in self.magnetoCb:
-              cb(data)
+              cb(*args)
 
         if path == '/orientation':
             data = await websocket.recv()
+            args = self.get_data(data)
             for cb in self.orientationCb:
-              cb(data)
+              cb(*args)
 
         if path == '/geolocation':
             data = await websocket.recv()
+            args = self.get_data(data)
             for cb in self.geolocCb:
-              cb(data)
+              cb(*args)
 
         if path == '/stepcounter':
             data = await websocket.recv()

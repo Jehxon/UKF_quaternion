@@ -2,7 +2,7 @@ import numpy as np
 from matplotlib import pyplot as plt
 
 class UKF:
-  def __init__(self, evolutionProcessCovariance, evolutionModel, measurementsCovariances, measurementsObservationFunctions):
+  def __init__(self, evolutionModel, evolutionProcessCovariance, measurementsObservationFunctions, measurementsCovariances):
     # Evolution model
     self.evolutionModel = evolutionModel
     self.evolutionProcessCovariance = evolutionProcessCovariance
@@ -126,7 +126,7 @@ def tests():
     x[:,i] = model(x[:,i-1]) + v[:,i]
     y[:,i] = measurement(x[:,i]) + n[:,i]
     
-  ukf = UKF(Pv, model, [Pn], [measurement])
+  ukf = UKF(model, Pv, [measurement], [Pn])
   ukf.init(x0, P0)
   
   xEst = np.zeros((L,numSteps))

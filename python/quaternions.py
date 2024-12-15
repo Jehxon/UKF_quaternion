@@ -1,7 +1,7 @@
 import numpy as np
 
 class Quaternion:
-  def __init__(self, w = 1, x = 0, y = 0, z = 0):
+  def __init__(self, w = 1.0, x = 0.0, y = 0.0, z = 0.0):
     self.w = w
     self.x = x
     self.y = y
@@ -54,7 +54,7 @@ class Quaternion:
   def norm2(self):
     return self.w * self.w + self.x * self.x + self.y * self.y + self.z * self.z
   
-  def norm(self):
+  def norm(self) -> float:
     return self.norm2() ** 0.5
   
   def normalized(self):
@@ -88,6 +88,26 @@ class Quaternion:
   def applyInverseTo(self, v):
     return self.conjugate().applyTo(v)
   
+  def toMatrix(self):
+    r00 = 2*(self.w*self.w + self.x*self.x) - 1
+    r01 = 2*(self.x*self.y - self.w*self.z)
+    r02 = 2*(self.x*self.z + self.w*self.y)
+
+    r10 = 2*(self.x*self.y + self.w*self.z)
+    r11 = 2*(self.w*self.w + self.y*self.y) - 1
+    r12 = 2*(self.y*self.z - self.w*self.x)
+
+    r20 = 2*(self.x*self.z - self.w*self.y)
+    r21 = 2*(self.y*self.z + self.w*self.x)
+    r22 = 2*(self.w*self.w + self.z*self.z) - 1
+     
+    rot_matrix = np.array([[r00, r01, r02],
+                           [r10, r11, r12],
+                           [r20, r21, r22]])
+    return np.array([[r00, r01, r02],
+                     [r10, r11, r12],
+                     [r20, r21, r22]])
+
   def toEulerZYX(self):
     sqw = self.w*self.w
     sqx = self.x*self.x
@@ -110,9 +130,9 @@ class Quaternion:
     r21 = -2*(self.x*self.z - self.w*self.y)
     r31 = 2*(self.y*self.z + self.w*self.x)
     r32 = sqw - sqx - sqy + sqz
-    rx = np.arctan2( r31, r32 )
-    ry = np.arcsin ( r21 )
-    rz = np.arctan2( r11, r12 )
+    rx = np.arctan2(r31, r32)
+    ry = np.arcsin (r21)
+    rz = np.arctan2(r11, r12)
     return (rx, ry, rz)
     
   def FromEulerZYX(roll, pitch, yaw):
@@ -122,6 +142,7 @@ class Quaternion:
     qw = np.cos(roll/2) * np.cos(pitch/2) * np.cos(yaw/2) + np.sin(roll/2) * np.sin(pitch/2) * np.sin(yaw/2)
     return Quaternion(qw, qx, qy, qz)
   
+  @staticmethod
   def FromVectors(u, v):
     # Returns a quaternion q such that q*u*qconj / ||u|| = v / ||v||
     # The chosen quaternion will be the only one to not apply torque to u (see https://math.stackexchange.com/questions/2251214/calculate-quaternions-from-two-directional-vectors)
@@ -129,10 +150,10 @@ class Quaternion:
     nv = np.linalg.norm(v)
     cross = np.cross(u, v)
     return 1 / (2*nu*nv) * Quaternion(
-    nu*nv + u.T@v,
-    cross[0],
-    cross[1],
-    cross[2]
+      nu*nv + u.T@v,
+      cross[0],
+      cross[1],
+      cross[2]
     )
     
 
